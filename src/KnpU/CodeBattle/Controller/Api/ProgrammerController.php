@@ -26,6 +26,8 @@ class ProgrammerController extends BaseController
 
     public function newAction(Request $request)
     {
+        $this->enforceUserSecurity();
+
         $programmer = new Programmer();
         $this->handleRequest($request, $programmer);
 
@@ -49,6 +51,8 @@ class ProgrammerController extends BaseController
         if (!$programmer) {
             $this->throw404('Crap! This programmer has deserted! We\'ll send a search party');
         }
+
+        $this->enforceProgrammerOwnershipSecurity($programmer);
 
         $this->handleRequest($request, $programmer);
 
@@ -78,6 +82,9 @@ class ProgrammerController extends BaseController
     public function deleteAction($nickname)
     {
         $programmer = $this->getProgrammerRepository()->findOneByNickname($nickname);
+
+        $this->enforceProgrammerOwnershipSecurity($programmer);
+
         if ($programmer) {
             $this->delete($programmer);
         }
@@ -120,7 +127,7 @@ class ProgrammerController extends BaseController
             $programmer->$property = $val;
         }
 
-        $programmer->userId = $this->findUserByUsername('weaverryan')->id;
+        $programmer->userId = $this->getLoggedInUser()->id;
     }
 
     private function throwApiProblemValidationException(array $errors)
