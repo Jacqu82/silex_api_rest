@@ -2,8 +2,6 @@
 
 namespace KnpU\CodeBattle\Controller\Api;
 
-use KnpU\CodeBattle\Api\ApiProblem;
-use KnpU\CodeBattle\Api\ApiProblemException;
 use KnpU\CodeBattle\Controller\BaseController;
 use KnpU\CodeBattle\Model\Programmer;
 use Silex\ControllerCollection;
@@ -31,8 +29,7 @@ class ProgrammerController extends BaseController
         $programmer = new Programmer();
         $this->handleRequest($request, $programmer);
 
-        $errors = $this->validate($programmer);
-        if (!empty($errors)) {
+        if ($errors = $this->validate($programmer)) {
             $this->throwApiProblemValidationException($errors);
         }
 
@@ -103,14 +100,7 @@ class ProgrammerController extends BaseController
 
     private function handleRequest(Request $request, Programmer $programmer)
     {
-        $data = json_decode($request->getContent(), true);
-        if (null === $data) {
-            $apiProblem = new ApiProblem(
-                400,
-                ApiProblem::TYPE_INVALID_REQUEST_BODY_FORMAT
-            );
-            throw new ApiProblemException($apiProblem);
-        }
+        $data = $this->decodeRequestBodyIntoParameters($request);
 
         $isNew = !$programmer->id;
         $apiProperties = ['avatarNumber', 'tagLine'];
@@ -120,25 +110,12 @@ class ProgrammerController extends BaseController
 
         foreach ($apiProperties as $property) {
             // if PATCH and the field isn't sent, just skip it!
-            if ($request->isMethod('PATCH') && !isset($data[$property])) {
+            if ($request->isMethod('PATCH') && !$data->has($property)) {
                 continue;
             }
-            $val = isset($data[$property]) ? $data[$property] : null;
-            $programmer->$property = $val;
+            $programmer->$property = $data->get($property);
         }
 
         $programmer->userId = $this->getLoggedInUser()->id;
     }
-
-    private function throwApiProblemValidationException(array $errors)
-    {
-        $apiProblem = new ApiProblem(
-            400,
-            ApiProblem::TYPE_VALIDATION_ERROR
-        );
-        $apiProblem->set('errors', $errors);
-
-        throw new ApiProblemException($apiProblem);
-    }
-
 }

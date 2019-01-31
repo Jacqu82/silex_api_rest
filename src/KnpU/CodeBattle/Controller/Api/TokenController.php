@@ -18,9 +18,13 @@ class TokenController extends BaseController
     {
         $this->enforceUserSecurity();
 
-        $data = json_decode($request->getContent(), true);
+        $data = $this->decodeRequestBodyIntoParameters($request);
         $token = new ApiToken($this->getLoggedInUser()->id);
-        $token->notes = $data['notes'];
+        $token->notes = $data->get('notes');
+
+        if ($errors = $this->validate($token)) {
+            $this->throwApiProblemValidationException($errors);
+        }
 
         $this->getApiTokenRepository()->save($token);
 

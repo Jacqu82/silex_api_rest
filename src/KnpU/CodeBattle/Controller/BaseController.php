@@ -3,6 +3,8 @@
 namespace KnpU\CodeBattle\Controller;
 
 use JMS\Serializer\SerializationContext;
+use KnpU\CodeBattle\Api\ApiProblem;
+use KnpU\CodeBattle\Api\ApiProblemException;
 use KnpU\CodeBattle\Application;
 use KnpU\CodeBattle\Model\Programmer;
 use KnpU\CodeBattle\Model\User;
@@ -13,6 +15,7 @@ use KnpU\CodeBattle\Security\Token\ApiTokenRepository;
 use Silex\Application as SilexApplication;
 use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -263,6 +266,35 @@ abstract class BaseController implements ControllerProviderInterface
         if ($programmer->userId !== $this->getLoggedInUser()->id) {
             throw new AccessDeniedException();
         }
+    }
+
+    protected function decodeRequestBodyIntoParameters(Request $request)
+    {
+        if (!$request->getContent()) {
+            $data = [];
+        } else {
+            $data =  json_decode($request->getContent(), true);
+            if (null === $data) {
+                $apiProblem = new ApiProblem(
+                    400,
+                    ApiProblem::TYPE_INVALID_REQUEST_BODY_FORMAT
+                );
+                throw new ApiProblemException($apiProblem);
+            }
+        }
+
+        return new ParameterBag($data);
+    }
+
+    protected function throwApiProblemValidationException(array $errors)
+    {
+        $apiProblem = new ApiProblem(
+            400,
+            ApiProblem::TYPE_VALIDATION_ERROR
+        );
+        $apiProblem->set('errors', $errors);
+
+        throw new ApiProblemException($apiProblem);
     }
 
 }
