@@ -2,9 +2,10 @@
 
 namespace KnpU\CodeBattle\Security\Authentication;
 
+use KnpU\CodeBattle\Api\ApiProblem;
+use KnpU\CodeBattle\Api\ApiProblemResponseFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Translation\Translator;
@@ -18,10 +19,12 @@ use Symfony\Component\Translation\Translator;
 class ApiEntryPoint implements AuthenticationEntryPointInterface
 {
     private $translator;
+    private $apiProblemResponse;
 
-    public function __construct(Translator $translator)
+    public function __construct(Translator $translator, ApiProblemResponseFactory $apiProblemResponse)
     {
         $this->translator = $translator;
+        $this->apiProblemResponse = $apiProblemResponse;
     }
 
     /**
@@ -30,13 +33,16 @@ class ApiEntryPoint implements AuthenticationEntryPointInterface
      * @param Request $request The request that resulted in an AuthenticationException
      * @param AuthenticationException $authException The exception that started the authentication process
      *
-     * @return Response
+     * @return JsonResponse
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
         $message = $this->getMessage($authException);
 
-        $response = new JsonResponse(array('detail' => $message), 401);
+        $apiProblem = new ApiProblem(401, ApiProblem::TYPE_AUTHENTICATION_ERROR);
+        $apiProblem->set('detail', $message);
+
+        $response = $this->apiProblemResponse->createResponse($apiProblem);
 
         return $response;
     }
