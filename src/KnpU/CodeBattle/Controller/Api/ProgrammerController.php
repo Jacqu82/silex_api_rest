@@ -3,6 +3,7 @@
 namespace KnpU\CodeBattle\Controller\Api;
 
 use Hateoas\Representation\CollectionRepresentation;
+use Hateoas\Representation\PaginatedRepresentation;
 use KnpU\CodeBattle\Controller\BaseController;
 use KnpU\CodeBattle\Model\Homepage;
 use KnpU\CodeBattle\Model\Programmer;
@@ -116,11 +117,34 @@ class ProgrammerController extends BaseController
         return new Response(null, 204);
     }
 
-    public function listAction()
+    public function listAction(Request $request)
     {
-        $programmers = $this->getProgrammerRepository()->findAll();
-        $collection = new CollectionRepresentation($programmers, 'programmers');
-        $response = $this->createApiResponse($collection, 200);
+        $nicknameFilter = $request->query->get('nickname');
+        if ($nicknameFilter) {
+            $programmers = $this->getProgrammerRepository()->findAllLike(['nickname' => '%' . $nicknameFilter . '%']);
+        } else {
+            $programmers = $this->getProgrammerRepository()->findAll();
+        }
+
+        $page = $request->query->get('page', 1);
+        $limit = $request->query->get('limit', 5);
+        $numberOfPages = ceil(count($programmers) / $limit);
+        $offset = ($page - 1) * $limit;
+
+        $collection = new CollectionRepresentation(
+            array_slice($programmers, $offset, $limit),
+            'programmers'
+        );
+        $paginated = new PaginatedRepresentation(
+            $collection,
+            'api_programmers_list',
+            array(),
+            $page,
+            $limit,
+            $numberOfPages
+        );
+
+        $response = $this->createApiResponse($paginated, 200);
 
         return $response;
     }
