@@ -14,6 +14,16 @@ use JMS\Serializer\Annotation as Serializer;
  *          parameters = {
  *              "nickname" = "expr(object.programmer.nickname)"
  *          }
+ *      ),
+ *     embedded="expr(object.programmer)"
+ * )
+ * @Hateoas\Relation(
+ *     "self",
+ *     href = @Hateoas\Route(
+ *          "api_battle_show",
+ *          parameters = {
+ *              "id" = "expr(object.id)"
+ *          }
  *      )
  * )
  */

@@ -2,6 +2,7 @@
 
 namespace KnpU\CodeBattle\Controller\Api;
 
+use Hateoas\Representation\CollectionRepresentation;
 use KnpU\CodeBattle\Controller\BaseController;
 use KnpU\CodeBattle\Model\Programmer;
 use Silex\ControllerCollection;
@@ -20,6 +21,8 @@ class ProgrammerController extends BaseController
         $controllers->match('/api/programmers/{nickname}', array($this, 'updateAction'))
             ->method('PATCH');
         $controllers->delete('/api/programmers/{nickname}', array($this, 'deleteAction'));
+        $controllers->get('/api/programmers/{nickname}/battles', array($this, 'listBattleAction'))
+            ->bind('api_programmers_battles_list');
     }
 
     public function newAction(Request $request)
@@ -76,6 +79,19 @@ class ProgrammerController extends BaseController
         return $this->createApiResponse($programmer);
     }
 
+    public function listBattleAction($nickname)
+    {
+        $programmer = $this->getProgrammerRepository()->findOneByNickname($nickname);
+        if (!$programmer) {
+            $this->throw404('Crap! This programmer has deserted! We\'ll send a search party');
+        }
+        $battles = $this->getBattleRepository()->findAllBy(['programmerId' => $programmer->id]);
+        $collection = new CollectionRepresentation($battles, 'battles');
+        $response = $this->createApiResponse($collection, 200);
+
+        return $response;
+    }
+
     public function deleteAction($nickname)
     {
         $programmer = $this->getProgrammerRepository()->findOneByNickname($nickname);
@@ -92,8 +108,8 @@ class ProgrammerController extends BaseController
     public function listAction()
     {
         $programmers = $this->getProgrammerRepository()->findAll();
-        $data = ['programmers' => $programmers];
-        $response = $this->createApiResponse($data, 200);
+        $collection = new CollectionRepresentation($programmers, 'programmers');
+        $response = $this->createApiResponse($collection, 200);
 
         return $response;
     }

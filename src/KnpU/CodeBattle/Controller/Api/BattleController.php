@@ -58,6 +58,9 @@ class BattleController extends BaseController
             $this->throw404(sprintf('No battle found for id %d!', $id));
         }
 
-        return $this->createApiResponse($battle);
+        $response = $this->createApiResponse($battle);
+//        $response->headers->set('Content-Type', 'application/hal+json');
+
+        return $response;
     }
 }

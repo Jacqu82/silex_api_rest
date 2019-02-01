@@ -246,7 +246,7 @@ abstract class BaseController implements ControllerProviderInterface
     {
         $json = $this->serialize($data);
         $response = new Response($json, $statusCode, [
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/hal+json'
         ]);
 
         return $response;
