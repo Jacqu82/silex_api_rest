@@ -2,6 +2,11 @@
 
 namespace KnpU\CodeBattle\Model;
 
+use JMS\Serializer\Annotation as Serializer;
+
+/**
+ * @Serializer\ExclusionPolicy("all")
+ */
 class Battle
 {
     /* All public properties are persisted */

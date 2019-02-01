@@ -15,7 +15,7 @@ class ProgrammerController extends BaseController
         $controllers->post('/api/programmers', array($this, 'newAction'));
         $controllers->get('/api/programmers', array($this, 'listAction'));
         $controllers->get('/api/programmers/{nickname}', array($this, 'showAction'))
-            ->bind('api_programmers_show');
+            ->bind('api_programmer_show');
         $controllers->put('/api/programmers/{nickname}', array($this, 'updateAction'));
         $controllers->match('/api/programmers/{nickname}', array($this, 'updateAction'))
             ->method('PATCH');
@@ -73,7 +73,7 @@ class ProgrammerController extends BaseController
             $this->throw404('Crap! This programmer has deserted! We\'ll send a search party');
         }
 
-        return $this->createApiResponse($programmer, 200);
+        return $this->createApiResponse($programmer);
     }
 
     public function deleteAction($nickname)
