@@ -15,7 +15,7 @@ class ProgrammerController extends BaseController
         $controllers->post('/api/programmers', array($this, 'newAction'));
         $controllers->get('/api/programmers', array($this, 'listAction'));
         $controllers->get('/api/programmers/{nickname}', array($this, 'showAction'))
-            ->bind('api_programmer_show');
+            ->bind('api_programmers_show');
         $controllers->put('/api/programmers/{nickname}', array($this, 'updateAction'));
         $controllers->match('/api/programmers/{nickname}', array($this, 'updateAction'))
             ->method('PATCH');

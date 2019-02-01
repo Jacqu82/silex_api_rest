@@ -22,7 +22,7 @@ Feature:
     Then the response status code should be 201
     And the "Location" header should exist
     And the "didProgrammerWin" property should exist
-    And print last response
+    #And print last response
 
   Scenario: GET one battle
     Given there is a project called "projectA"
@@ -37,4 +37,7 @@ Feature:
 #    didProgrammerWin
 #    notes
 #    """
+#    And the "programmerUri" property should equal "/api/programmers/Fred"
+#    And the "_links.programmer.href" property should equal "/api/programmers/Fred"
+    And the link "programmer" should exist and its value should be "/api/programmers/Fred"
     And print last response
