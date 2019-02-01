@@ -4,6 +4,7 @@ namespace KnpU\CodeBattle\Controller\Api;
 
 use Hateoas\Representation\CollectionRepresentation;
 use KnpU\CodeBattle\Controller\BaseController;
+use KnpU\CodeBattle\Model\Homepage;
 use KnpU\CodeBattle\Model\Programmer;
 use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,8 +14,11 @@ class ProgrammerController extends BaseController
 {
     protected function addRoutes(ControllerCollection $controllers)
     {
+        $controllers->get('/api', array($this, 'homepageAction'))
+            ->bind('api_homepage');
         $controllers->post('/api/programmers', array($this, 'newAction'));
-        $controllers->get('/api/programmers', array($this, 'listAction'));
+        $controllers->get('/api/programmers', array($this, 'listAction'))
+            ->bind('api_programmers_list');
         $controllers->get('/api/programmers/{nickname}', array($this, 'showAction'))
             ->bind('api_programmers_show');
         $controllers->put('/api/programmers/{nickname}', array($this, 'updateAction'));
@@ -23,6 +27,13 @@ class ProgrammerController extends BaseController
         $controllers->delete('/api/programmers/{nickname}', array($this, 'deleteAction'));
         $controllers->get('/api/programmers/{nickname}/battles', array($this, 'listBattleAction'))
             ->bind('api_programmers_battles_list');
+    }
+
+    public function homepageAction()
+    {
+        $homepage = new Homepage();
+
+        return $this->createApiResponse($homepage);
     }
 
     public function newAction(Request $request)
